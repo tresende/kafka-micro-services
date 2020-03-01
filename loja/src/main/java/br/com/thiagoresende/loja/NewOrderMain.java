@@ -7,25 +7,30 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 public class NewOrderMain {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties());
-
-        Callback callback = (data, ex) -> {
-            if (ex != null) {
-                ex.printStackTrace();
-                return;
-            }
-            System.out.println(data.topic() + ":::partition" + data.partition()  + "/offset" + data.offset()  + "/timestamp" + data.timestamp());
-        };
+        for (int i = 0; i < 100; i++) {
 
 
-        ProducerRecord<String, String> record = new ProducerRecord<String, String>("ECOMMERCE_NEW_ORDERS", "123", "abc");
-        ProducerRecord<String, String> emailRecord = new ProducerRecord<String, String>("ECOMMERCE_SEND_EMAIL", "xpto", "xpto");
-        producer.send(record, callback).get();
-        producer.send(emailRecord, callback).get();
+            KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties());
+
+            Callback callback = (data, ex) -> {
+                if (ex != null) {
+                    ex.printStackTrace();
+                    return;
+                }
+                System.out.println(data.topic() + ":::partition" + data.partition() + "/offset" + data.offset() + "/timestamp" + data.timestamp());
+            };
+
+            String key = UUID.randomUUID().toString();
+            ProducerRecord<String, String> record = new ProducerRecord<String, String>("ECOMMERCE_NEW_ORDERS", key, "abc");
+            ProducerRecord<String, String> emailRecord = new ProducerRecord<String, String>("ECOMMERCE_SEND_EMAIL", key, "xpto");
+            producer.send(record, callback).get();
+            producer.send(emailRecord, callback).get();
+        }
     }
 
     private static Properties properties() {
